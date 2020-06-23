@@ -34,6 +34,8 @@
   "author": "Jakub Synowiec <github@jakubsynowiec.info>",
   "license": "Apache-2.0",
   "dependencies": {
+    "axios": "^0.19.2",
+    "cheerio": "^1.0.0-rc.3",
     "dayjs": "^1.8.28",
     "dotenv": "^8.2.0",
     "tslib": "~2.0.0"
