@@ -1,9 +1,8 @@
 import axios from 'axios';
 import cheerio from 'cheerio';
+import { getUnpackedSettings } from 'http2';
 
-(async () => {
-  const page = 1;
-
+const scrapePage = async (houses, page: number) => {
   const { data } = await axios.get(
     `https://www.srx.com.sg/search/sale/hdb?page=${page}`,
   );
@@ -36,7 +35,7 @@ import cheerio from 'cheerio';
 
     yearBuilt = yearBuilt.replace(/Built-|•/g, '');
 
-    let numRoomsRaw =
+    const numRoomsRaw =
       $(
         'div > div.listingContainerTop > div.row.listingDetailsInfo > div.listingDetail.listingDetailsView.col-xs-6.col-6.col-sm-7.col-md-7 > div > div.listingDetailType > span:nth-child(1)',
         elm,
@@ -58,14 +57,54 @@ import cheerio from 'cheerio';
         elm,
       ).text() || '';
 
-    numBedrooms = parseInt(numBedrooms);
+    numBedrooms = parseInt(numBedrooms) || undefined;
 
-    const output = { title, price, yearBuilt, numRooms, numBedrooms, meta };
+    let numBaths =
+      $(
+        'div > div.listingContainerTop.highlight > div.row.listingDetailsInfo.highlight > div.listingDetail.listingDetailsView.col-xs-6.col-6.col-sm-7.col-md-7 > div > div.row.listingEnquiryRow > div.col-md-5.listingDetailRoom > div > div.listingDetailToiletNo',
+        elm,
+      ).text() || '';
 
-    console.log('---------');
-    console.log(output);
-    console.log('---------');
+    numBaths = parseInt(numBaths) || undefined;
+
+    if (title && price) {
+      const output = {
+        title,
+        price,
+        yearBuilt,
+        numRooms,
+        numBedrooms,
+        numBaths,
+        meta,
+      };
+
+      houses.set(genKey(output), output);
+    }
   });
 
-  // console.log(data);
+  return Promise.resolve();
+};
+
+const genKey = (output) => {
+  const {
+    title,
+    price,
+    yearBuilt,
+    numRooms,
+    numBedrooms,
+    numBaths,
+    meta,
+  } = output;
+
+  return `${title}-price`;
+};
+
+(async () => {
+  const houses = new Map();
+
+  for (let i = 0; i < 10; i++) {
+    await scrapePage(houses, i);
+  }
+
+  console.log(houses);
 })();
