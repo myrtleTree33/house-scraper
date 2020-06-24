@@ -36,13 +36,31 @@ import cheerio from 'cheerio';
 
     yearBuilt = yearBuilt.replace(/Built-|•/g, '');
 
-    const numRooms =
+    let numRoomsRaw =
       $(
         'div > div.listingContainerTop > div.row.listingDetailsInfo > div.listingDetail.listingDetailsView.col-xs-6.col-6.col-sm-7.col-md-7 > div > div.listingDetailType > span:nth-child(1)',
         elm,
       ).text() || '';
 
-    const output = { title, price, yearBuilt, numRooms };
+    let meta = undefined;
+
+    let numRooms = numRoomsRaw.replace('Room', '').trim();
+    numRooms = parseInt(numRooms);
+
+    if (isNaN(numRooms)) {
+      meta = numRoomsRaw;
+      numRooms = undefined;
+    }
+
+    let numBedrooms =
+      $(
+        'div > div.listingContainerTop.highlight > div.row.listingDetailsInfo.highlight > div.listingDetail.listingDetailsView.col-xs-6.col-6.col-sm-7.col-md-7 > div > div.row.listingEnquiryRow > div.col-md-5.listingDetailRoom > div > div.listingDetailRoomNo',
+        elm,
+      ).text() || '';
+
+    numBedrooms = parseInt(numBedrooms);
+
+    const output = { title, price, yearBuilt, numRooms, numBedrooms, meta };
 
     console.log('---------');
     console.log(output);
